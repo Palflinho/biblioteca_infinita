@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="A Biblioteca Infinita: jogo educativo para crianças de 6 a 10 anos com dislexia. História, personagens, jogos e como funciona.">
+<title>A Biblioteca Infinita</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Lexend:wght@400;500;600&display=swap">
+<style>
+@font-face{font-family:'OpenDyslexic';font-weight:400;font-style:normal;font-display:swap;src:url(fonts/OpenDyslexic-Regular.otf) format('opentype')}
+@font-face{font-family:'OpenDyslexic';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/OpenDyslexic-Bold.otf) format('opentype')}
+
+/* Layout: noite na Biblioteca. Faixas coloridas de largura total, cada uma com sua cena;
+   camadas com parallax (letras, estrelas, estantes), celulares com capturas reais do jogo.
+   Visual único e vibrante, feito para olhos de criança; leitura com opção de OpenDyslexic. */
+:root{
+  --night:#1a1450; --night2:#2b2085; --ink:#1d1a3a; --white:#ffffff;
+  --lamp:#ffc83d; --coral:#ff6f61; --mint:#2fd1b5; --sky:#4cc9f0; --grape:#9b5de5; --sun:#fff0b8; --pink:#ff8fc7;
+  --paper:#f5f8ff; --line:#d9ddf3; --muted:#4b4872;
+  --f-display:'Baloo 2','Lexend',system-ui,sans-serif; --f-body:'Lexend',system-ui,sans-serif;
+  --lh:1.7; --ls:0; --fs:1.125rem; color-scheme:light;
+}
+html.od{--f-display:'OpenDyslexic','Lexend',sans-serif;--f-body:'OpenDyslexic','Lexend',sans-serif;--fs:1.02rem;--lh:1.8}
+html.roomy{--lh:2.05;--ls:.05em;--fs:1.2rem}
+html.od.roomy{--fs:1.08rem}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:74px}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:var(--fs);line-height:var(--lh);letter-spacing:var(--ls);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--night)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;margin:0;text-wrap:balance}
+h2{font-size:clamp(2rem,6vw,3.4rem);font-weight:800;margin-bottom:.45em}
+h3{font-size:1.35rem;font-weight:700;margin-bottom:.3em}
+p{margin:0 0 1em;max-width:62ch}
+a{color:inherit}
+:focus-visible{outline:4px solid var(--lamp);outline-offset:3px;border-radius:6px}
+.in{max-width:1080px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));position:relative;z-index:2}
+.band{position:relative;overflow:hidden;padding-block:clamp(56px,9vw,110px)}
+.band.night{background:linear-gradient(180deg,var(--night),var(--night2));color:#fff}
+.band.sun{background:var(--sun)} .band.mint{background:#c9f7ee} .band.sky{background:#d3f1fc} .band.pink{background:#ffe0ef} .band.paper{background:var(--paper)} .band.grape{background:#e8dcfb}
+.wave{position:absolute;left:0;right:0;top:-1px;height:36px;z-index:1;pointer-events:none}
+.eyebrow{display:inline-block;font-family:var(--f-display);font-weight:700;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;padding:4px 14px;border-radius:999px;background:var(--lamp);color:var(--ink);margin-bottom:.9em;transform:rotate(-1.5deg)}
+.lead{font-size:1.25em;max-width:58ch}
+button{font:inherit;cursor:pointer}
+/* nav */
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(26,20,80,.94);backdrop-filter:blur(6px)}
+nav .in{display:flex;align-items:center;gap:4px;padding-block:8px;overflow-x:auto;scrollbar-width:thin}
+nav a{white-space:nowrap;text-decoration:none;color:#fff;font-family:var(--f-display);font-weight:600;font-size:.95rem;padding:6px 12px;border-radius:999px}
+nav a:hover{background:rgba(255,255,255,.16)}
+.tools{margin-left:auto;display:flex;gap:6px;flex:none;padding-left:10px;position:sticky;right:0;background:#1a1450}
+.tbtn{font-family:var(--f-display);font-weight:700;font-size:.85rem;border:2px solid #fff;background:transparent;color:#fff;border-radius:999px;padding:5px 12px}
+.tbtn[aria-pressed="true"]{background:var(--lamp);border-color:var(--lamp);color:var(--ink)}
+/* hero */
+.hero{min-height:min(92vh,860px);display:flex;align-items:center;padding-block:clamp(70px,12vw,140px)}
+.layer{position:absolute;inset:0;pointer-events:none;will-change:transform}
+.star{position:absolute;border-radius:50%;background:#fff;animation:tw 3s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.moon{position:absolute;right:8%;top:10%;width:clamp(120px,22vw,260px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7cf,#ffd96a 60%,#ffb93d);box-shadow:0 0 120px 40px rgba(255,200,61,.35)}
+.shelf{position:absolute;bottom:0;left:0;right:0;height:38%;display:flex;align-items:flex-end;gap:5px;padding:0 4px}
+.shelf i{display:block;flex:1;border-radius:6px 6px 0 0;min-width:0}
+.far i{opacity:.35}.mid i{opacity:.6}
+.tile{position:absolute;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;color:#fff;border-radius:22%;box-shadow:0 8px 0 rgba(0,0,0,.22);animation:bob 5s ease-in-out infinite}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -14px}}
+.hero h1{font-size:clamp(3rem,11vw,7rem);font-weight:800;letter-spacing:-.01em;text-shadow:0 6px 0 rgba(0,0,0,.25)}
+.hero h1 .b{display:inline-block;margin-right:.05em}
+.hero h1 .row2{display:block}
+.hero p.lead{margin-top:1em;color:#e9e6ff}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.4em}
+.btn{display:inline-block;text-decoration:none;font-family:var(--f-display);font-weight:800;font-size:1.15rem;padding:12px 26px;border-radius:999px;background:var(--lamp);color:var(--ink);box-shadow:0 6px 0 #c58f00;transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #c58f00}
+.btn.alt{background:#fff;box-shadow:0 6px 0 #b5b2d9}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.8em}
+.chip{font-family:var(--f-display);font-weight:600;font-size:.9rem;border-radius:999px;padding:4px 14px;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.35)}
+.chip.warn{background:var(--lamp);border-color:var(--lamp);color:var(--ink)}
+/* cards */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.card{background:#fff;border-radius:24px;padding:22px;box-shadow:0 8px 0 rgba(29,26,58,.12);min-width:0;border:3px solid var(--ink)}
+.card p:last-child{margin-bottom:0}
+.tag{display:inline-block;font-family:var(--f-display);font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:.4em}
+.icon{width:64px;height:64px;margin-bottom:10px;display:block}
+.note{background:#fff;border:3px dashed var(--ink);border-radius:20px;padding:14px 20px;max-width:72ch}
+.note p{margin:0}
+/* characters */
+.char{display:flex;gap:16px;align-items:flex-start}
+.char svg{flex:none;width:92px;height:92px}
+.quote{margin:.7em 0 0;padding:10px 14px;background:var(--sun);border-radius:16px;font-weight:500}
+.draft{border-style:dashed;background:rgba(255,255,255,.7)}
+/* tower */
+.tower{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:860px){.tower{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}}
+.floors{display:flex;flex-direction:column-reverse;gap:8px;margin:0;padding:0;list-style:none}
+.floors button{width:100%;text-align:left;display:flex;gap:12px;align-items:center;border:3px solid var(--ink);background:#fff;color:var(--ink);border-radius:18px;padding:8px 14px;box-shadow:0 5px 0 rgba(29,26,58,.18);transition:transform .12s}
+.floors button:hover{transform:translateX(6px)}
+.floors button[aria-pressed="true"]{background:var(--lamp);transform:translateX(10px)}
+.floors .n{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:50%;font-family:var(--f-display);font-weight:800;color:#fff;border:3px solid var(--ink)}
+.floors small{display:block;color:var(--muted);line-height:1.3}
+.detail{position:sticky;top:84px;background:#fffdf4}
+.detail dl{margin:0;display:grid;gap:.6em}
+.detail dt{font-family:var(--f-display);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.detail dd{margin:0}
+/* phones */
+.game{display:grid;gap:28px;align-items:center;grid-template-columns:minmax(0,1fr);margin-bottom:clamp(40px,7vw,80px)}
+@media(min-width:820px){.game{grid-template-columns:minmax(0,1fr) 300px}.game.rev{grid-template-columns:300px minmax(0,1fr)}.game.rev .shot{order:-1}}
+.shot{display:flex;flex-direction:column;align-items:center;gap:10px}
+.phone{width:min(260px,72vw);border:10px solid #120d3a;border-radius:38px;overflow:hidden;background:#000;box-shadow:0 18px 0 rgba(18,13,58,.25),0 30px 50px rgba(0,0,0,.25);transform:rotate(var(--r,3deg))}
+.phone img{display:block;width:100%;aspect-ratio:9/16;object-fit:cover}
+.shot figcaption{font-size:.85rem;color:var(--muted);text-align:center;max-width:26ch;line-height:1.4}
+.pill{display:inline-block;font-family:var(--f-display);font-weight:800;border-radius:999px;padding:3px 14px;color:#fff;margin-bottom:.5em}
+/* steps */
+.steps{display:grid;gap:16px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:56px minmax(0,1fr);gap:16px;align-items:start;background:#fff;border:3px solid var(--ink);border-radius:24px;padding:16px 18px;box-shadow:0 6px 0 rgba(29,26,58,.14)}
+.steps li::before{content:counter(s);width:56px;height:56px;border-radius:50%;background:var(--c,var(--coral));color:#fff;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.5rem;border:3px solid var(--ink)}
+.steps p{margin:0}
+.steps.cols{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+/* demo */
+.demo{background:#fff;border:3px solid var(--ink);border-radius:28px;padding:20px;box-shadow:0 8px 0 rgba(29,26,58,.14)}
+.stage{position:relative;height:190px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#2b2085,#5a3fd0);margin-bottom:16px}
+.drop{position:absolute;top:-60px;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.8rem;color:#fff;animation:fall var(--d,5s) linear infinite}
+@keyframes fall{to{transform:translateY(300px)}}
+.meters{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));margin:12px 0}
+.bar{display:flex;gap:4px;margin:6px 0}
+.bar b{flex:1;height:24px;border-radius:8px;background:#e7e9f8;border:2px solid var(--ink)}
+.bar b.on{background:var(--mint)}.sp .bar b.on{background:var(--coral)}.sp .bar b.half{background:linear-gradient(90deg,var(--coral) 50%,#e7e9f8 50%)}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btns button{font-family:var(--f-display);font-weight:700;font-size:1rem;border:3px solid var(--ink);background:var(--sun);color:var(--ink);border-radius:999px;padding:8px 18px;box-shadow:0 4px 0 rgba(29,26,58,.25)}
+.btns button:active{transform:translateY(3px);box-shadow:none}
+.btns button[data-a="err"],.btns button[data-a="err-fast"]{background:#ffd3cf}
+.btns button[data-a="reset"]{margin-left:auto;background:#fff}
+.log{margin:14px 0 0;padding:0;list-style:none;font-size:.95rem;color:var(--muted);min-height:4.8em}
+pre.report{background:#16123f;color:#e7e5ff;border-radius:24px;padding:20px;overflow-x:auto;font:.92rem/1.7 ui-monospace,Menlo,Consolas,monospace;letter-spacing:0;white-space:pre-wrap;max-width:100%;border:3px solid var(--ink)}
+.scroll-x{overflow-x:auto;max-width:100%;background:#fff;border:3px solid var(--ink);border-radius:24px}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:12px 16px;border-bottom:2px solid var(--line);vertical-align:top}
+th{font-family:var(--f-display);font-weight:700;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;background:var(--sun)}
+tr:last-child td{border-bottom:0}
+.st{font-family:var(--f-display);font-weight:700;font-size:.8rem;border-radius:999px;padding:2px 12px;white-space:nowrap;border:2px solid var(--ink)}
+.st.ok{background:var(--mint)}.st.part{background:var(--lamp)}.st.todo{background:#ffd3cf}
+footer{background:var(--night);color:#cfcaff;padding-block:48px;text-align:center}
+footer p{margin:0 auto}
+.dots{display:flex;justify-content:center;gap:10px;margin-bottom:16px}
+.dots i{width:16px;height:16px;border-radius:50%}
+@media(max-width:700px){.tile{opacity:.28}.tools{position:static}.shelf{height:22%}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}.layer{transform:none!important}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Seções"><div class="in">
+  <a href="#topo">Início</a><a href="#projeto">Projeto</a><a href="#historia">História</a><a href="#personagens">Personagens</a><a href="#andares">Andares</a><a href="#jogos">Jogos</a><a href="#jornada">Jornada</a><a href="#dificuldade">Dificuldade</a><a href="#adulto">Relatório</a><a href="#ciencia">Ciência</a><a href="#situacao">Situação</a>
+  <span class="tools"><button class="tbtn" id="fontBtn" aria-pressed="false" title="Trocar para a fonte OpenDyslexic">Fonte OpenDyslexic</button><button class="tbtn" id="roomy" aria-pressed="false" title="Mais espaço entre letras e linhas">Mais espaço</button></span>
+</div></nav>
+
+<main>
+
+<header class="band night hero" id="topo">
+  <div class="layer" data-p="0.05" id="stars" aria-hidden="true"></div>
+  <div class="layer" data-p="0.12" aria-hidden="true"><div class="moon"></div></div>
+  <div class="layer" data-p="0.18" aria-hidden="true"><div class="shelf far" data-shelf="far"></div></div>
+  <div class="layer" data-p="0.3" aria-hidden="true" id="tiles"></div>
+  <div class="layer" data-p="0.45" aria-hidden="true"><div class="shelf mid" data-shelf="mid"></div></div>
+  <div class="in">
+    <h1><span class="b">A</span><span class="b">Biblioteca</span><span class="row2" id="logo"></span></h1>
+    <p class="lead">A porta se fechou e a Biblioteca é enorme! Para achar a saída, você ajuda pessoas que se perderam, e cada uma entrega um pedaço do mapa. No caminho, você treina letras, sílabas, atenção e ritmo, sem nota e sem susto.</p>
+    <div class="cta"><a class="btn" href="#historia">Conhecer a história</a><a class="btn alt" href="#jogos">Ver o jogo</a></div>
+    <div class="chips"><span class="chip warn">Protótipo em desenvolvimento</span><span class="chip warn">Ainda não testado com crianças</span><span class="chip">Crianças de 6 a 10 anos</span><span class="chip">Celular e tablet</span></div>
+  </div>
+</header>
+
+<section class="band sun" id="projeto">
+  <svg class="wave" viewBox="0 0 1200 36" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0H1200V12C1100 40 1000 0 900 14S700 38 600 14 400 0 300 14 100 36 0 12Z" fill="#2b2085"/></svg>
+  <div class="layer" data-p="-0.1" aria-hidden="true"><svg viewBox="0 0 400 400" style="position:absolute;right:-60px;top:40px;width:340px;opacity:.5"><circle cx="200" cy="200" r="190" fill="#ffd96a"/><circle cx="200" cy="200" r="120" fill="#ffc83d"/></svg></div>
+  <div class="in">
+    <span class="eyebrow">O projeto</span>
+    <h2>Um jogo para praticar, não para ser avaliado</h2>
+    <p class="lead">A dislexia é uma dificuldade de aprendizagem da leitura e da escrita. Em português, o que costuma pesar é a leitura lenta e custosa, mesmo depois de a criança conhecer as letras. Praticar é preciso, mas muita prática vira cobrança. A Biblioteca Infinita oferece prática curta, calma e sem medo de errar.</p>
+    <div class="grid" style="margin-top:28px">
+      <div class="card"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="22" r="12" fill="#ffc83d" stroke="#1d1a3a" stroke-width="3"/><path d="M10 58c2-18 10-24 22-24s20 6 22 24z" fill="#2fd1b5" stroke="#1d1a3a" stroke-width="3"/></svg><span class="tag">Para quem</span><h3>Crianças do 1º ao 5º ano</h3><p>De 6 a 10 anos: de quem está começando a ler a quem já lê mas ainda tropeça. O jogo descobre onde cada criança está e ajusta o caminho.</p></div>
+      <div class="card"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="14" width="14" height="40" rx="3" fill="#ff6f61" stroke="#1d1a3a" stroke-width="3"/><rect x="25" y="8" width="14" height="46" rx="3" fill="#4cc9f0" stroke="#1d1a3a" stroke-width="3"/><rect x="42" y="18" width="14" height="36" rx="3" fill="#9b5de5" stroke="#1d1a3a" stroke-width="3"/></svg><span class="tag">O que é</span><h3>Quatro jogos e uma história</h3><p>Jogos curtos de letras, sílabas, atenção visual e ritmo, dentro de uma Biblioteca com dez andares. Um relatório separado mostra ao adulto o que aconteceu.</p></div>
+      <div class="card"><svg class="icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="24" fill="#fff" stroke="#1d1a3a" stroke-width="3"/><path d="M20 34l8 8 16-18" fill="none" stroke="#ff6f61" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="tag">O que não é</span><h3>Não diagnostica nem trata</h3><p>O jogo não substitui avaliação nem acompanhamento com profissionais. Os números ficam só no relatório do adulto e descrevem o que a criança fez jogando.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band night" id="historia">
+  <div class="layer" data-p="0.15" id="stars2" aria-hidden="true"></div>
+  <div class="layer" data-p="0.3" id="tiles2" aria-hidden="true"></div>
+  <div class="in">
+    <span class="eyebrow">A história</span>
+    <h2>Quem está perdido são as pessoas, não você</h2>
+    <p class="lead">Você entra numa Biblioteca imensa, cheia de corredores. A porta se fecha. Para voltar, é preciso <strong>mapear os caminhos</strong> entre as partes da Biblioteca. Em cada parte há alguém que se perdeu antes. Quando você ajuda essa pessoa, ganha dela um pedaço do mapa. Com o mapa inteiro, a saída aparece!</p>
+    <p>Cada andar é um universo dentro da Biblioteca: um corredor onde as letras caem como chuva de luz, uma sala redonda de bolhas de sílabas, uma estante que acende por um instante. O universo é só cenário, personagem e frase: o desafio é o mesmo, e o cenário nunca esconde o que você precisa ver.</p>
+    <h3 style="margin:1.4em 0 .6em;font-size:1.7rem">O ciclo de um andar</h3>
+    <ol class="steps cols" style="color:var(--ink)">
+      <li style="--c:var(--coral)"><p><strong>Chegada.</strong> Uma cena curta, de no máximo três falas, apresenta a pessoa perdida.</p></li>
+      <li style="--c:var(--mint)"><p><strong>O desafio.</strong> O jogo do andar, com dificuldade que se ajusta a você.</p></li>
+      <li style="--c:var(--grape)"><p><strong>Conclusão.</strong> A pessoa agradece e entrega um pedaço do mapa, igual para todas as crianças.</p></li>
+      <li style="--c:var(--sky)"><p><strong>Salão de reencontro.</strong> A cada grupo de jogos, as pessoas ajudadas se reencontram. Ali o jogo só observa, e nada bloqueia o caminho.</p></li>
+    </ol>
+    <h3 style="margin:1.6em 0 .6em;font-size:1.7rem">Regras que protegem a brincadeira</h3>
+    <div class="grid" style="color:var(--ink)">
+      <div class="card"><p>A história só anda para a frente. Errar, pedir ajuda ou demorar nunca deixa ninguém em perigo, triste ou assustado.</p></div>
+      <div class="card"><p>Sem vilão, sem vidas, sem tempo na tela, sem ranking e sem nota. A recompensa celebra "você ajudou", não "você passou".</p></div>
+      <div class="card"><p>Pouco texto, em fonte legível, com opção de fonte para dislexia. A dislexia não é tema nem superpoder da história.</p></div>
+    </div>
+    <div class="note" style="margin-top:24px;color:var(--ink)"><p><strong>Estado:</strong> a abertura, os andares 1 e 2 e o reencontro do Salão Surpresa já têm cena no jogo. O resto do roteiro é rascunho a revisar com especialista e com crianças.</p></div>
+  </div>
+</section>
+
+<section class="band pink" id="personagens">
+  <div class="layer" data-p="-0.12" aria-hidden="true"><svg viewBox="0 0 400 400" style="position:absolute;left:-90px;top:30px;width:320px;opacity:.55"><circle cx="200" cy="200" r="190" fill="#ffb8db"/></svg></div>
+  <div class="in">
+    <span class="eyebrow">Personagens</span>
+    <h2>Quem você vai encontrar</h2>
+    <p class="lead">São pessoas comuns que se perderam na Biblioteca. Nomes e falas são provisórios, e os desenhos aqui são ilustrações deste site: o jogo ainda usa círculos coloridos no lugar dos retratos.</p>
+    <div class="grid" id="cast" style="margin-top:26px"></div>
+    <h3 style="margin:1.8em 0 .5em;font-size:1.7rem">Rascunhos para os próximos andares</h3>
+    <div class="grid" id="castDraft"></div>
+  </div>
+</section>
+
+<section class="band sky" id="andares">
+  <div class="layer" data-p="0.14" aria-hidden="true"><svg viewBox="0 0 400 400" style="position:absolute;right:-70px;bottom:20px;width:300px;opacity:.6"><circle cx="200" cy="200" r="190" fill="#a8e4fa"/></svg></div>
+  <div class="in">
+    <span class="eyebrow">Os andares</span>
+    <h2>Dez andares para subir</h2>
+    <p class="lead">Cada jogo tem o seu andar, e a cada grupo de jogos vem um salão misto que só observa. Toque num andar para espiar o que acontece nele. Os andares 11 a 14 existem no projeto e ficam escondidos até depois do MVP.</p>
+    <div class="tower" style="margin-top:26px">
+      <ol class="floors" id="floors" aria-label="Andares"></ol>
+      <div class="card detail" id="detail" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section class="band paper" id="jogos">
+  <div class="in">
+    <span class="eyebrow">Os jogos</span>
+    <h2>Quatro jogos curtos</h2>
+    <p class="lead" style="margin-bottom:2.2em">Cada jogo treina uma habilidade ligada à leitura. A criança só vê o nome e como jogar. Termos técnicos e números ficam no relatório do adulto. As imagens são capturas reais do protótipo, ainda com arte provisória.</p>
+
+    <div class="game">
+      <div><span class="pill" style="background:#0aa58f">Letras e trocas</span><h3 style="font-size:2rem">Acha a Letra!</h3><p>Letras caem como chuva. Você toca na letra pedida. Os níveis começam com letras bem diferentes e chegam às que se confundem (b, d, p, q; n, u; m, w).</p><p><strong>Treina:</strong> distinguir letras parecidas. O jogo descobre qual troca é a difícil para você e passa a repetir mais essa.</p></div>
+      <figure class="shot" style="margin:0"><div class="phone" data-p="0.04" style="--r:3deg"><img src="img/chuva.png" alt="Captura do jogo Acha a Letra: duas letras o caem em quadrados rosados e a instrução 'Toque na letra: b'" loading="lazy"></div><figcaption>Acha a Letra!</figcaption></figure>
+    </div>
+
+    <div class="game rev">
+      <div><span class="pill" style="background:#2f5fa8">Sílabas</span><h3 style="font-size:2rem">Esprema a Sílaba!</h3><p>Bolhas com sílabas flutuam. Você toca nelas na ordem para formar a palavra (bo, la: bola).</p><p><strong>Treina:</strong> separar a palavra em sílabas, uma base para ler e escrever.</p></div>
+      <figure class="shot" style="margin:0"><div class="phone" data-p="-0.04" style="--r:-3deg"><img src="img/bolhas.png" alt="Captura do jogo Esprema a Sílaba: bolhas com as sílabas bo, pa e la e a instrução 'Monte a palavra: bola'" loading="lazy"></div><figcaption>Esprema a Sílaba!</figcaption></figure>
+    </div>
+
+    <div class="game">
+      <div><span class="pill" style="background:#8a4f9e">Atenção visual (a ser substituído)</span><h3 style="font-size:2rem">Quem Sumiu?</h3><p>Algumas letras aparecem e depois uma some. Você diz qual sumiu.</p><p><strong>Hoje</strong> é um jogo de memória. A ideia é trocá-lo por um jogo de atenção visual a vários elementos ao mesmo tempo (o "Relâmpago da Estante"), que tem mais apoio na literatura.</p></div>
+      <figure class="shot" style="margin:0"><div class="phone" data-p="0.04" style="--r:3deg"><img src="img/memoria.png" alt="Captura do jogo Quem Sumiu: duas cartas com as letras f e t e a pergunta 'Qual letra sumiu?'" loading="lazy"></div><figcaption>Quem Sumiu?</figcaption></figure>
+    </div>
+
+    <div class="game rev">
+      <div><span class="pill" style="background:#b5601a">Ritmo (em avaliação)</span><h3 style="font-size:2rem">Segue o Ritmo!</h3><p>Você ouve e vê batidas e repete o padrão tocando.</p><p><strong>Em aberto:</strong> não é certo que fique no MVP. A evidência de que ritmo ajuda na leitura é recente e modesta, e vem de jogos de formato diferente.</p></div>
+      <figure class="shot" style="margin:0"><div class="phone" data-p="-0.04" style="--r:-3deg"><img src="img/ritmo.png" alt="Captura do jogo Segue o Ritmo: três estrelas, um botão grande 'Escute' e o botão 'Ouvir de novo'" loading="lazy"></div><figcaption>Segue o Ritmo!</figcaption></figure>
+    </div>
+
+    <div class="game">
+      <div><span class="pill" style="background:#59676a">Salões mistos</span><h3 style="font-size:2rem">O mapa dos andares</h3><p>Entre os grupos de jogos há salões que alternam os jogos anteriores em nível fixo, 3 rodadas de cada, sem dica e sem reforço. Você não vê nota. Servem para comparar o desempenho ao longo do tempo e não bloqueiam nada.</p><p>Quando um andar é concluído, o selo vira "completo" e uma estrela acende.</p></div>
+      <figure class="shot" style="margin:0"><div class="phone" data-p="0.04" style="--r:3deg"><img src="img/completo.png" alt="Captura do mapa de andares: Chuva de Letras com selo 'completo' e estrela amarela, Sala das Bolhas liberada" loading="lazy"></div><figcaption>Mapa de andares</figcaption></figure>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3>Se você errar</h3><p>O jogo repete o mesmo item com a resposta certa em destaque. É uma ajuda, não um castigo.</p></div>
+      <div class="card"><h3>Se você empacar</h3><p>Aparece um botão de dica. Respostas dadas com ajuda não contam como domínio, mas também não punem.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band mint" id="jornada">
+  <div class="layer" data-p="-0.1" aria-hidden="true"><svg viewBox="0 0 400 400" style="position:absolute;left:-80px;top:60px;width:300px;opacity:.6"><circle cx="200" cy="200" r="190" fill="#9ee9d9"/></svg></div>
+  <div class="in">
+    <span class="eyebrow">A jornada</span>
+    <h2>Do primeiro toque ao relatório</h2>
+    <ol class="steps" style="margin-top:24px">
+      <li style="--c:var(--coral)"><p><strong>Perfil.</strong> No primeiro acesso, o adulto cria o perfil (nome ou apelido, idade, ano escolar) e confirma que o responsável concorda com o registro dos resultados.</p></li>
+      <li style="--c:var(--lamp)"><p><strong>Pega a Estrela!</strong> Um jogo curto mede a velocidade que a criança acha confortável. Ela ajusta o quanto os jogos se movem.</p></li>
+      <li style="--c:var(--mint)"><p><strong>Sala de Entrada.</strong> Três jogos de 10 itens (letras, sílabas, atenção). Cada um sobe quando a criança acerta e desce quando erra, até achar onde ela está. Sem dica e sem reforço. O resultado é o perfil de habilidades.</p></li>
+      <li style="--c:var(--sky)"><p><strong>Abertura e mapa.</strong> A cena de abertura apresenta a Biblioteca. Depois a criança vê o mapa de andares e os pedaços do mapa que já recebeu.</p></li>
+      <li style="--c:var(--grape)"><p><strong>Os andares.</strong> Cada andar tem cena de chegada, o jogo e cena de conclusão. O andar conta como concluído quando a criança acerta pelo menos 6 das últimas 8 respostas sem ajuda e já passou por todos os níveis de letras do andar.</p></li>
+      <li style="--c:var(--pink)"><p><strong>Revisão.</strong> A cada 3 desafios concluídos, ou depois de cerca de 14 dias, a Sala de Revisão repete a escada em versão curta e atualiza o perfil. O jogo usa o perfil para decidir qual habilidade merece mais prática: duas de cada três vão para as mais fracas e uma para a mais forte, e nenhuma é abandonada.</p></li>
+      <li style="--c:var(--ink)"><p><strong>Relatório.</strong> Atrás de uma pergunta de multiplicação, o adulto vê o relatório e pode copiá-lo.</p></li>
+    </ol>
+    <div class="note" style="margin-top:24px"><p>Esses números (10 itens, 6 de 8, 3 desafios, 14 dias) são hipóteses de trabalho, escolhidas a partir da literatura e de simulações. Ainda serão ajustados com profissionais e crianças.</p></div>
+  </div>
+</section>
+
+<section class="band grape" id="dificuldade">
+  <div class="in">
+    <span class="eyebrow">Dificuldade que se ajusta</span>
+    <h2>Duas réguas: o que você vê e a pressa</h2>
+    <p class="lead">Se letras mais parecidas e queda mais rápida subissem juntas, o jogo não saberia por que a criança errou: confundiu as letras ou foi a pressa? Por isso o Acha a Letra tem duas réguas separadas.</p>
+    <div class="grid" style="margin:22px 0 30px">
+      <div class="card"><span class="tag">Régua do conteúdo</span><p>Só olha acerto e erro, nunca o tempo. <strong>2 acertos seguidos</strong> sobem um nível; <strong>2 erros seguidos</strong> descem um. Um acerto ou erro isolado mantém.</p></div>
+      <div class="card"><span class="tag">Régua da velocidade</span><p>Olha o tempo em relação à média pessoal da criança. Acerto rápido sobe; acerto devagar mantém; erro desce. Um erro <em>muito</em> rápido (provável chute) desce só meio degrau.</p></div>
+    </div>
+    <h3 style="font-size:1.7rem;margin-bottom:.5em">Experimente!</h3>
+    <div class="demo" id="demo">
+      <div class="stage" id="stage" aria-hidden="true"></div>
+      <p style="margin-bottom:.2em">Faça de conta que você está jogando. Toque nas respostas e veja as letras caírem mais rápido ou mais devagar.</p>
+      <div class="meters">
+        <div class="meter"><strong>Nível do conteúdo</strong> <span id="lvlTxt"></span><div class="bar" id="lvlBar" aria-hidden="true"></div><small id="streakTxt" style="color:var(--muted)"></small></div>
+        <div class="meter sp"><strong>Velocidade da queda</strong> <span id="spdTxt"></span><div class="bar" id="spdBar" aria-hidden="true"></div></div>
+      </div>
+      <div class="btns">
+        <button data-a="fast-hit">Acertei rápido</button><button data-a="slow-hit">Acertei devagar</button><button data-a="err">Errei</button><button data-a="err-fast">Errei muito rápido</button><button data-a="reset">Recomeçar</button>
+      </div>
+      <ul class="log" id="log" aria-live="polite"></ul>
+      <p style="margin:12px 0 0;font-size:.9rem;color:var(--muted)">Exemplo didático do mecanismo atual, com a escala de 0 a 4 do conteúdo. Os valores são provisórios.</p>
+    </div>
+    <h3 style="font-size:1.7rem;margin:1.6em 0 .4em">Por que medir no começo</h3>
+    <p>Crianças mais velhas têm dificuldades diferentes das mais novas, e a série não diz quais. Uma criança de 4º ano pode já distinguir bem as letras e ainda errar ao ligar o som à imagem. Por isso o jogo mede cada habilidade na Sala de Entrada e usa o resultado para dar mais prática onde a criança precisa, em vez de seguir uma ordem fixa para todos.</p>
+    <h3 style="font-size:1.7rem;margin:1.2em 0 .4em">O que ainda está em decisão</h3>
+    <p>A regra de 2 acertos e 2 erros deixa a criança errando metade das vezes no nível de fronteira, o que é pouco acolhedor. Simulações mostram que "3 acertos sobem, 1 erro desce" mira cerca de 79% de acerto. A Sala de Entrada já usa essa regra. A decisão para os jogos e o critério de "dominou" (por exemplo, 8 de 10 com 3 alternativas) dependem de profissionais e do piloto.</p>
+  </div>
+</section>
+
+<section class="band sun" id="adulto">
+  <div class="in">
+    <span class="eyebrow">Para o adulto</span>
+    <h2>O relatório</h2>
+    <p class="lead">Psicólogos, psicopedagogos e educadores veem o que a criança fez: perfil do aluno, velocidade, perfil de habilidades, cada jogo com nível alcançado e tempo de decisão, trocas de letras por tipo, medições dos salões e avisos sobre como ler os números. O relatório descreve o jogo e não diagnostica.</p>
+    <p>Exemplo com dados inventados:</p>
+<pre class="report" aria-label="Exemplo de relatório">2B. PERFIL DE HABILIDADES (Sala de Entrada)
+Letras e trocas de letras (Acha a Letra): nível 3 de 4.
+  8 acertos em 10 itens (80%), decisão média 2,1 s,
+  2 inversões da escada. Confiança 100%.
+Sílabas (Esprema a Sílaba): pelo menos o nível 4 de 6
+  (não errou o bastante para achar o limite).
+Prioridade do jogo para a próxima prática:
+  Atenção visual &gt; Sílabas &gt; Letras e trocas de letras.
+Revisão: a cada 3 desafios concluídos ou 14 dias.
+Cerca de 10 itens por habilidade é pouco: trate como
+ponto de partida, a confirmar nas revisões.</pre>
+    <p style="font-size:.9rem;color:var(--muted);margin-top:10px">Dados fictícios, só para mostrar o formato.</p>
+  </div>
+</section>
+
+<section class="band paper" id="ciencia">
+  <div class="in">
+    <span class="eyebrow">Base científica</span>
+    <h2>O que a pesquisa sustenta e o que não</h2>
+    <p class="lead">O projeto parte de uma revisão de 33 artigos sobre jogos para dislexia e de pesquisas posteriores, priorizando trabalhos de 2020 a 2026. Várias decisões usam evidência indireta, e cada uma está marcada como hipótese no projeto.</p>
+    <div class="scroll-x" style="margin-top:22px"><table>
+      <thead><tr><th>Decisão</th><th>O que a literatura diz</th></tr></thead>
+      <tbody>
+        <tr><td>Treinar consciência fonológica e sílabas</td><td>É o resultado de maior efeito na meta-análise de Hall e colegas (2023, 53 estudos, do 1º ao 5º ano).</td></tr>
+        <tr><td>Quanto tempo jogar</td><td>Não há tempo mínimo universal. Mais horas rendem pouco por hora, e num ensaio com jogo adaptativo no 1º ano a exposição dentro do jogo não previu o resultado.</td></tr>
+        <tr><td>Dar menos prática ao que já está no teto</td><td>Há apoio indireto (letra-som chega ao teto cedo; Germano e colegas, 2017, no Brasil). Nenhum ensaio comparou essa escolha com a sequência completa.</td></tr>
+        <tr><td>Regra por série escolar</td><td>A literatura recente não traz receita por série. O que muda do 1º ao 5º ano é a fase de leitura, o que sustenta medir a criança em vez de usar a série.</td></tr>
+        <tr><td>Quantos acertos para dominar</td><td>Nenhum estudo define isso para jogos de leitura com dislexia. Usamos cálculos próprios (a chance de passar no chute depende do número de alternativas) e modelos de domínio.</td></tr>
+        <tr><td>Ritmo e atenção visual</td><td>Há ensaios recentes com ganhos modestos, em formatos diferentes do nosso. Por isso o ritmo continua em avaliação e a atenção visual substituirá a memória.</td></tr>
+      </tbody></table></div>
+    <div class="note" style="margin-top:24px"><p><strong>Limite importante:</strong> nenhum estudo mostra que este jogo melhora a leitura. Para saber, será preciso um piloto com crianças, com teste externo antes e depois, de preferência com grupo de comparação.</p></div>
+  </div>
+</section>
+
+<section class="band mint" id="situacao">
+  <div class="in">
+    <span class="eyebrow">Situação atual</span>
+    <h2>O que já existe e o que falta</h2>
+    <div class="scroll-x" style="margin-top:22px"><table>
+      <thead><tr><th>Peça</th><th>Estado</th><th>Observação</th></tr></thead>
+      <tbody>
+        <tr><td>Quatro jogos, dez andares e três salões mistos</td><td><span class="st ok">Pronto</span></td><td>Testados no Unity em 05/11/2026 por 433 testes automáticos e por execução dos fluxos, com perfil fictício.</td></tr>
+        <tr><td>Motor adaptativo (duas réguas no Acha a Letra)</td><td><span class="st ok">Pronto</span></td><td>Valores ainda provisórios.</td></tr>
+        <tr><td>Perfil do aluno e relatório do adulto</td><td><span class="st ok">Pronto</span></td><td>Relatório com rolagem e cópia.</td></tr>
+        <tr><td>Calibração, Sala de Entrada, revisão e escalonador</td><td><span class="st ok">Pronto</span></td><td>Testado em Play pela equipe; valores a calibrar.</td></tr>
+        <tr><td>História: abertura, andares 1 e 2 e pedaços do mapa</td><td><span class="st part">Parcial</span></td><td>Faltam os andares 3 a 10, voz, retratos e botão de pular e repetir.</td></tr>
+        <tr><td>Atenção visual no lugar do Quem Sumiu</td><td><span class="st todo">A fazer</span></td><td>Depende de decisão da equipe.</td></tr>
+        <tr><td>Gravações de fala (sons de letras, sílabas, palavras)</td><td><span class="st todo">A fazer</span></td><td>Inventário de 17 palavras, 18 sílabas e 10 letras-alvo já feito; falta gravar com apoio de profissional.</td></tr>
+        <tr><td>Arte final e áudio</td><td><span class="st todo">A fazer</span></td><td>Hoje há arte provisória (Kenney, licença livre).</td></tr>
+        <tr><td>Teste em aparelho Android real</td><td><span class="st todo">A fazer</span></td><td>Toque real, teclado, botão Voltar, vibração e latência.</td></tr>
+        <tr><td>Revisão por especialista e piloto com crianças</td><td><span class="st todo">A fazer</span></td><td>Conteúdo, níveis, roteiro e números ainda não foram revistos.</td></tr>
+        <tr><td>Exportação de dados e aplicativo do pedagogo</td><td><span class="st todo">A fazer</span></td><td>Fora do escopo do MVP.</td></tr>
+      </tbody></table></div>
+    <h3 style="font-size:1.7rem;margin:1.6em 0 .4em">Cuidados com os dados da criança</h3>
+    <p>O progresso fica salvo no aparelho. Antes de qualquer piloto, é preciso decidir como proteger dados pessoais de crianças (hoje o arquivo local não é criptografado), exigir consentimento do responsável e permitir apagar o cadastro.</p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="in">
+  <div class="dots" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--lamp)"></i><i style="background:var(--mint)"></i><i style="background:var(--sky)"></i><i style="background:var(--grape)"></i></div>
+  <p><strong>A Biblioteca Infinita</strong> é um projeto em desenvolvimento por Paulo Cavalheiro e Lucas Weber. Feito com Unity e C#. Os textos de história, as ilustrações deste site e os valores de dificuldade são provisórios. As capturas de tela vêm do protótipo, com arte provisória.</p>
+</div></footer>
+
+<script>
+/* ---------- aleatório fixo (a cena não muda a cada carga) ---------- */
+function rng(seed){return function(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646}}
+var COLORS=['#ff6f61','#ffc83d','#2fd1b5','#4cc9f0','#9b5de5','#ff8fc7'];
+function stars(id,n,seed){var r=rng(seed),el=document.getElementById(id);for(var i=0;i<n;i++){var s=document.createElement('i');s.className='star';var z=1+r()*3;s.style.cssText='left:'+(r()*100)+'%;top:'+(r()*100)+'%;width:'+z+'px;height:'+z+'px;animation-delay:'+(r()*3)+'s';el.appendChild(s)}}
+stars('stars',70,7);stars('stars2',40,11);
+function tiles(id,list){var el=document.getElementById(id);list.forEach(function(t,i){var d=document.createElement('div');d.className='tile';d.textContent=t[0];d.style.cssText='left:'+t[1]+'%;top:'+t[2]+'%;width:'+t[3]+'px;height:'+t[3]+'px;font-size:'+(t[3]*.62)+'px;background:'+COLORS[i%COLORS.length]+';transform:rotate('+t[4]+'deg);animation-delay:'+(i*.6)+'s';el.appendChild(d)})}
+tiles('tiles',[['b',3,14,72,-10],['d',4,56,56,8],['p',66,8,50,12],['q',78,52,78,-6],['o',90,30,54,9],['m',58,60,46,-12],['n',50,6,40,6]]);
+tiles('tiles2',[['u',4,20,60,-8],['w',90,12,64,10],['l',84,70,52,-6],['a',10,76,50,12]]);
+/* logo: "Infinita" com letras-bloco */
+(function(){var el=document.getElementById('logo'),w='Infinita';for(var i=0;i<w.length;i++){var s=document.createElement('span');s.className='b';s.textContent=w[i];s.style.cssText='color:'+COLORS[i%COLORS.length]+';display:inline-block;transform:rotate('+((i%2?1:-1)*2)+'deg)';el.appendChild(s)}})();
+/* estantes */
+document.querySelectorAll('[data-shelf]').forEach(function(sh,k){var r=rng(k+3),pal=['#ff6f61','#ffc83d','#2fd1b5','#4cc9f0','#9b5de5','#ff8fc7'];for(var i=0;i<26;i++){var b=document.createElement('i');b.style.height=(35+r()*65)+'%';b.style.background=pal[Math.floor(r()*pal.length)];sh.appendChild(b)}});
+
+/* ---------- personagens ---------- */
+function face(skin,extra,bg){return '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="'+bg+'" stroke="#1d1a3a" stroke-width="3"/>'+extra.back+'<circle cx="50" cy="56" r="26" fill="'+skin+'" stroke="#1d1a3a" stroke-width="3"/>'+extra.front+'<circle cx="41" cy="55" r="3.2" fill="#1d1a3a"/><circle cx="59" cy="55" r="3.2" fill="#1d1a3a"/><path d="M42 66q8 7 16 0" fill="none" stroke="#1d1a3a" stroke-width="3" stroke-linecap="round"/><circle cx="35" cy="63" r="4" fill="#ff8f9c" opacity=".6"/><circle cx="65" cy="63" r="4" fill="#ff8f9c" opacity=".6"/>'+(extra.top||'')+'</svg>'}
+var AV={
+ book:'<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#4cc9f0" stroke="#1d1a3a" stroke-width="3"/><path d="M50 30C38 22 22 24 16 28v40c8-4 24-6 34 4 10-10 26-8 34-4V28c-6-4-22-6-34 2z" fill="#fff" stroke="#1d1a3a" stroke-width="3" stroke-linejoin="round"/><path d="M50 30v42" stroke="#1d1a3a" stroke-width="3"/><circle cx="36" cy="50" r="4" fill="#1d1a3a"/><circle cx="64" cy="50" r="4" fill="#1d1a3a"/><path d="M40 60q10 8 20 0" fill="none" stroke="#1d1a3a" stroke-width="3" stroke-linecap="round"/></svg>',
+ libr:face('#ffd9b0',{back:'<circle cx="50" cy="26" r="11" fill="#7a4a2b" stroke="#1d1a3a" stroke-width="3"/><path d="M24 50a26 26 0 0 1 52 0v6H24z" fill="#7a4a2b" stroke="#1d1a3a" stroke-width="3"/>',front:'<circle cx="41" cy="55" r="8" fill="none" stroke="#1d1a3a" stroke-width="2.5"/><circle cx="59" cy="55" r="8" fill="none" stroke="#1d1a3a" stroke-width="2.5"/><path d="M49 55h2" stroke="#1d1a3a" stroke-width="2.5"/>'},'#2fd1b5'),
+ menino:face('#f2c18e',{back:'',front:'',top:'<path d="M24 46a26 24 0 0 1 52 0z" fill="#ff6f61" stroke="#1d1a3a" stroke-width="3"/><path d="M60 44h26" stroke="#1d1a3a" stroke-width="5" stroke-linecap="round"/>'},'#7fa6f0'),
+ senhora:face('#f6d3b3',{back:'<path d="M22 56a28 30 0 0 1 56 0z" fill="#d8d8e8" stroke="#1d1a3a" stroke-width="3"/>',front:'<circle cx="41" cy="55" r="8" fill="none" stroke="#1d1a3a" stroke-width="2.5"/><circle cx="59" cy="55" r="8" fill="none" stroke="#1d1a3a" stroke-width="2.5"/>'},'#c394d6'),
+ musico:face('#c68642',{back:'',front:'',top:'<path d="M22 54a28 28 0 0 1 56 0" fill="none" stroke="#1d1a3a" stroke-width="5"/><rect x="14" y="48" width="10" height="16" rx="4" fill="#ff6f61" stroke="#1d1a3a" stroke-width="3"/><rect x="76" y="48" width="10" height="16" rx="4" fill="#ff6f61" stroke="#1d1a3a" stroke-width="3"/>'},'#ffc83d'),
+ astro:face('#e8b98a',{back:'',front:'',top:'<path d="M50 4l22 38H28z" fill="#5a3fd0" stroke="#1d1a3a" stroke-width="3" stroke-linejoin="round"/><path d="M50 16l3 7h7l-6 5 2 7-6-4-6 4 2-7-6-5h7z" fill="#ffc83d"/>'},'#9b5de5'),
+ gemeos:'<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="#ff8fc7" stroke="#1d1a3a" stroke-width="3"/><circle cx="34" cy="54" r="20" fill="#f2c18e" stroke="#1d1a3a" stroke-width="3"/><circle cx="66" cy="54" r="20" fill="#f2c18e" stroke="#1d1a3a" stroke-width="3"/><g fill="#1d1a3a"><circle cx="28" cy="52" r="2.6"/><circle cx="40" cy="52" r="2.6"/><circle cx="60" cy="52" r="2.6"/><circle cx="72" cy="52" r="2.6"/></g><g fill="none" stroke="#1d1a3a" stroke-width="2.5" stroke-linecap="round"><path d="M29 62q5 5 10 0"/><path d="M61 62q5 5 10 0"/></g></svg>',
+ foto:face('#ffd9b0',{back:'',front:'',top:'<rect x="30" y="76" width="40" height="22" rx="5" fill="#59676a" stroke="#1d1a3a" stroke-width="3"/><circle cx="50" cy="87" r="7" fill="#4cc9f0" stroke="#1d1a3a" stroke-width="3"/>'},'#2fd1b5')
+};
+var CAST=[
+ ['book','A Biblioteca','No jogo','Narra a abertura. É o lugar, não um adversário.','"Para achar a saída, vamos mapear os caminhos."'],
+ ['libr','A bibliotecária','No jogo · andar 1','Veio guardar um livro e se perdeu no Corredor das Letras.','"Aqui as letras caem como chuva de luz. As que você tocar acendem o corredor."'],
+ ['menino','O menino','No jogo · andar 2','Veio atrás de uma história e entrou na Sala das Bolhas.','"As bolhas juntam as palavras da estante. Pegue as sílabas na ordem!"']
+];
+var DRAFT=[
+ ['senhora','A senhora','Rascunho · andar 4','Procura o livro de que gostava, na estante que acende por um instante.'],
+ ['musico','O músico','Rascunho · andar 5','Se perdeu no escuro de uma sala onde a porta só abre com o ritmo certo.'],
+ ['astro','A astrônoma','Rascunho · andar 7','Se perdeu entre espelhos em que as sílabas parecem iguais.'],
+ ['gemeos','Os irmãos gêmeos','Rascunho · andar 8','Se perderam um do outro numa galeria de letras gêmeas.'],
+ ['foto','O fotógrafo','Rascunho · andar 9','Procura uma foto numa estante de vidro, onde tudo tem reflexo.']
+];
+function card(c,draft){var d=document.createElement('div');d.className='card char'+(draft?' draft':'');d.innerHTML=AV[c[0]]+'<div><span class="tag">'+c[2]+'</span><h3>'+c[1]+'</h3><p>'+c[3]+'</p>'+(c[4]?'<p class="quote">'+c[4]+'</p>':'')+'</div>';return d}
+CAST.forEach(function(c){document.getElementById('cast').appendChild(card(c,false))});
+DRAFT.forEach(function(c){document.getElementById('castDraft').appendChild(card(c,true))});
+
+/* ---------- andares ---------- */
+var C={l:'#0aa58f',s:'#2f5fa8',m:'#8a4f9e',r:'#b5601a',x:'#59676a'};
+var FL=[
+ {n:1,nome:'Chuva de Letras',c:'l',jogo:'Acha a Letra!',hab:'Distinguir letras parecidas',uni:'Corredor de estantes altas, onde letras caem como chuva de luz.',pes:'A bibliotecária, que veio guardar um livro.',fr:'"As letras que caem acendem o corredor."',pag:'Corredor das Letras',cena:true},
+ {n:2,nome:'Sala das Bolhas',c:'s',jogo:'Esprema a Sílaba!',hab:'Separar a palavra em sílabas',uni:'Sala redonda, com bolhas de sílaba flutuando entre as estantes.',pes:'Um menino que veio atrás de uma história.',fr:'"As bolhas juntam as palavras da estante."',pag:'Sala das Bolhas',cena:true},
+ {n:3,nome:'Salão Surpresa',c:'x',jogo:'Salão misto (só observa)',hab:'Observar os dois jogos anteriores em nível fixo',uni:'Salão de reencontro dos dois primeiros andares.',pes:'A bibliotecária e o menino se reencontram.',fr:'Só observa.',pag:null,cena:true},
+ {n:4,nome:'Estante Misteriosa',c:'m',jogo:'Quem Sumiu?',hab:'Memória visual de letras (será atenção visual)',uni:'Uma estante que acende por um instante e apaga.',pes:'Uma senhora que procura o livro de que gostava.',fr:'"A estante acende só um instante: o que brilhou?"',pag:'a definir',cena:false},
+ {n:5,nome:'Sala do Tambor',c:'r',jogo:'Segue o Ritmo!',hab:'Perceber e repetir padrões de batidas',uni:'Sala escura, com uma porta que responde a batidas.',pes:'Um músico que se perdeu no escuro.',fr:'"A porta só abre com o ritmo certo." (em revisão)',pag:'a definir',cena:false},
+ {n:6,nome:'Salão das Lanternas',c:'x',jogo:'Salão misto (só observa)',hab:'Observar memória e ritmo em nível fixo',uni:'Salão de lanternas, onde os ajudados se reencontram.',pes:'As pessoas dos andares 4 e 5.',fr:'Só observa.',pag:null,cena:false},
+ {n:7,nome:'Sala dos Espelhos',c:'s',jogo:'Esprema a Sílaba! II',hab:'Sílabas que diferem por uma letra parecida (bo, do, po)',uni:'Sala de espelhos em que as sílabas parecem iguais.',pes:'Uma astrônoma que se perdeu entre espelhos.',fr:'"Nos espelhos tudo parece igual: monte a palavra certa."',pag:'a definir',cena:false},
+ {n:8,nome:'Galeria dos Gêmeos',c:'l',jogo:'Acha a Letra! II',hab:'Letras muito parecidas (n/u, m/w, b/d, p/q)',uni:'Galeria de quadros de letras gêmeas.',pes:'Dois irmãos que se perderam um do outro.',fr:'"As letras gêmeas caem juntas: ache a pedida."',pag:'a definir',cena:false},
+ {n:9,nome:'Estante dos Reflexos',c:'m',jogo:'Quem Sumiu? II',hab:'Memória de letras todas da mesma família',uni:'Estante de vidro, em que tudo tem reflexo.',pes:'Um fotógrafo que procura uma foto.',fr:'"O reflexo esconde o que brilhou."',pag:'a definir',cena:false},
+ {n:10,nome:'Grande Salão',c:'x',jogo:'Salão misto de três jogos (só observa)',hab:'Observar Esprema II, Acha a Letra II e Quem Sumiu II',uni:'O salão central, onde todos os ajudados se encontram.',pes:'Todos juntos.',fr:'Só observa.',pag:null,cena:false}
+];
+var fl=document.getElementById('floors'),det=document.getElementById('detail');
+FL.forEach(function(f){
+  var li=document.createElement('li'),b=document.createElement('button');
+  b.type='button';b.setAttribute('aria-pressed','false');
+  b.innerHTML='<span class="n" style="background:'+C[f.c]+'">'+f.n+'</span><span><strong>'+f.nome+'</strong><small>'+f.jogo+'</small></span>';
+  b.addEventListener('click',function(){show(f,b)});
+  li.appendChild(b);fl.appendChild(li);
+});
+function show(f,btn){
+  fl.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed','false')});
+  btn.setAttribute('aria-pressed','true');
+  det.innerHTML='<span class="pill" style="background:'+C[f.c]+'">Andar '+f.n+'</span><h3 style="font-size:1.9rem">'+f.nome+'</h3><dl>'
+   +'<div><dt>Jogo</dt><dd>'+f.jogo+'</dd></div><div><dt>O que pratica</dt><dd>'+f.hab+'</dd></div>'
+   +'<div><dt>Cenário</dt><dd>'+f.uni+'</dd></div><div><dt>Quem está perdido</dt><dd>'+f.pes+'</dd></div>'
+   +'<div><dt>Frase da história</dt><dd>'+f.fr+'</dd></div>'
+   +'<div><dt>Pedaço do mapa</dt><dd>'+(f.pag?(f.pag==='a definir'?'A definir.':f.pag):'Nenhum: este andar só observa.')+'</dd></div>'
+   +'<div><dt>Cena no jogo</dt><dd>'+(f.cena?'Já existe (provisória).':'Ainda não escrita.')+'</dd></div></dl>';
+}
+show(FL[0],fl.querySelector('button'));
+
+/* ---------- demonstração das duas réguas, com letras caindo ---------- */
+(function(){
+  var MAXL=4,st,stage=document.getElementById('stage'),LET=['b','d','p','q','o'];
+  for(var i=0;i<5;i++){var d=document.createElement('div');d.className='drop';d.textContent=LET[i];d.style.left=(8+i*19)+'%';d.style.background=COLORS[i];d.style.animationDelay=(-i*1.1)+'s';stage.appendChild(d)}
+  function reset(){st={lvl:0,hs:0,es:0,sp:2,log:[]}}
+  function bar(id,n,val){var el=document.getElementById(id);el.innerHTML='';for(var i=0;i<n;i++){var b=document.createElement('b');if(val>=i+1)b.className='on';else if(val>=i+.5)b.className='half';el.appendChild(b)}}
+  function render(){
+    bar('lvlBar',MAXL+1,st.lvl+1);bar('spdBar',10,st.sp);
+    document.getElementById('lvlTxt').textContent='nível '+st.lvl+' de '+MAXL;
+    document.getElementById('spdTxt').textContent='índice '+Math.floor(st.sp)+' de 10';
+    document.getElementById('streakTxt').textContent='acertos seguidos: '+st.hs+' · erros seguidos: '+st.es;
+    var secs=(7-Math.floor(st.sp)*0.5).toFixed(1);
+    stage.querySelectorAll('.drop').forEach(function(d){d.style.setProperty('--d',secs+'s')});
+    var lg=document.getElementById('log');lg.innerHTML='';
+    st.log.slice(-3).forEach(function(t){var li=document.createElement('li');li.textContent=t;lg.appendChild(li)});
+  }
+  function act(a){
+    if(a==='reset'){reset();render();return}
+    var hit=a==='fast-hit'||a==='slow-hit',msg=[];
+    if(hit){st.es=0;st.hs++;if(st.hs>=2){if(st.lvl<MAXL){st.lvl++;msg.push('2 acertos seguidos: o conteúdo sobe.')}else msg.push('2 acertos seguidos: já está no último nível.');st.hs=0}else msg.push('1 acerto: o conteúdo se mantém.')}
+    else{st.hs=0;st.es++;if(st.es>=2){if(st.lvl>0){st.lvl--;msg.push('2 erros seguidos: o conteúdo desce.')}else msg.push('2 erros seguidos: já está no primeiro nível.');st.es=0}else msg.push('1 erro: o conteúdo se mantém.')}
+    var d=a==='fast-hit'?1:a==='slow-hit'?0:a==='err-fast'?-.5:-1;
+    st.sp=Math.max(0,Math.min(10,st.sp+d));
+    msg.push(a==='fast-hit'?'Acerto rápido: a queda acelera.':a==='slow-hit'?'Acerto devagar: a queda se mantém.':a==='err-fast'?'Erro muito rápido (provável chute): a queda desacelera só meio degrau.':'Erro: a queda desacelera.');
+    st.log.push(msg.join(' '));render();
+  }
+  reset();render();
+  document.getElementById('demo').addEventListener('click',function(e){var b=e.target.closest('button[data-a]');if(b)act(b.getAttribute('data-a'))});
+})();
+
+/* ---------- parallax por rolagem ---------- */
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  var items=[].slice.call(document.querySelectorAll('[data-p]')),ticking=false;
+  function upd(){
+    var vh=innerHeight;
+    items.forEach(function(el){
+      var host=el.closest('section,header')||el,r=host.getBoundingClientRect();
+      if(r.bottom<-200||r.top>vh+200)return;
+      var k=parseFloat(el.getAttribute('data-p')),off=(r.top+r.height/2-vh/2)*k*-1;
+      el.style.transform='translate3d(0,'+off.toFixed(1)+'px,0)'+(el.classList.contains('phone')?' rotate('+getComputedStyle(el).getPropertyValue('--r')+')':'');
+    });
+    ticking=false;
+  }
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(upd)}},{passive:true});
+  addEventListener('resize',upd);upd();
+})();
+
+/* ---------- fonte e espaço (preferência só neste navegador) ---------- */
+(function(){
+  var root=document.documentElement,fb=document.getElementById('fontBtn'),rb=document.getElementById('roomy');
+  function get(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  function od(on){root.classList.toggle('od',on);fb.setAttribute('aria-pressed',String(on));fb.textContent=on?'Fonte padrão':'Fonte OpenDyslexic';set('bi.od',on?'1':'0')}
+  function roomy(on){root.classList.toggle('roomy',on);rb.setAttribute('aria-pressed',String(on));set('bi.roomy',on?'1':'0')}
+  if(get('bi.od')==='1')od(true);if(get('bi.roomy')==='1')roomy(true);
+  fb.addEventListener('click',function(){od(!root.classList.contains('od'))});
+  rb.addEventListener('click',function(){roomy(!root.classList.contains('roomy'))});
+})();
+</script>
+
+</body>
+</html>
