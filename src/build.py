@@ -61,7 +61,7 @@ def head(p):
     ld=[{"@context":"https://schema.org","@type":"WebPage","@id":u+'#webpage',"url":u,"name":p['title'],"description":p['desc'],"inLanguage":"pt-BR","isPartOf":{"@id":BASE+'#website'}}]
     if p['slug']=='index':
         ld.append({"@context":"https://schema.org","@type":"WebSite","@id":BASE+'#website',"url":BASE,"name":SITE,"description":p['desc'],"inLanguage":"pt-BR",
-          "creator":[{"@type":"Person","name":"Paulo Cavalheiro"},{"@type":"Person","name":"Lucas Weber"}]})
+          "creator":[{"@type":"Person","name":"Kennya Lacerda"},{"@type":"Person","name":"Paulo Cavalheiro"},{"@type":"Person","name":"Lucas Weber"}]})
     else:
         ld.append({"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
           {"@type":"ListItem","position":1,"name":"Início","item":BASE},{"@type":"ListItem","position":2,"name":p['nav'],"item":u}]})
@@ -73,7 +73,7 @@ def head(p):
 <title>%s</title>
 <meta name="description" content="%s">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<meta name="author" content="Paulo Cavalheiro e Lucas Weber">
+<meta name="author" content="Kennya Lacerda, Paulo Cavalheiro e Lucas Weber">
 <meta name="theme-color" content="#1a1450">
 <link rel="canonical" href="%s">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -106,7 +106,7 @@ def foot(cur):
     return '''<footer class="site-footer"><div class="in">
 <div class="dots" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--lamp)"></i><i style="background:var(--mint)"></i><i style="background:var(--sky)"></i><i style="background:var(--grape)"></i></div>
 <nav aria-label="Mapa do site"><ul class="fnav">%s</ul></nav>
-<p><strong>A Biblioteca Infinita</strong> é um projeto em desenvolvimento por Paulo Cavalheiro e Lucas Weber. Feito com Unity e C#. Os textos de história, as ilustrações deste site e os valores de dificuldade são provisórios. As capturas de tela vêm do protótipo, com arte provisória.</p>
+<p><strong>A Biblioteca Infinita</strong> é um projeto em desenvolvimento por Kennya Lacerda, Paulo Cavalheiro e Lucas Weber. Feito com Unity e C#. Os textos de história, as ilustrações deste site e os valores de dificuldade são provisórios. As capturas de tela vêm do protótipo, com arte provisória.</p>
 <p class="small">O jogo não diagnostica nem trata dislexia e não substitui avaliação com profissionais.</p>
 </div></footer>
 <script src="assets/app.js" defer></script>
