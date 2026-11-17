@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://palflinho.github.io/biblioteca_infinita/sitemap.xml

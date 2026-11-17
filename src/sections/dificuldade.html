@@ -1,0 +1,28 @@
+<!--grape-->
+<div class="in">
+    <span class="eyebrow">Dificuldade que se ajusta</span>
+    <h2>Duas réguas: o que você vê e a pressa</h2>
+    <p class="lead">Se letras mais parecidas e queda mais rápida subissem juntas, o jogo não saberia por que a criança errou: confundiu as letras ou foi a pressa? Por isso o Acha a Letra tem duas réguas separadas.</p>
+    <div class="grid" style="margin:22px 0 30px">
+      <div class="card"><span class="tag">Régua do conteúdo</span><p>Só olha acerto e erro, nunca o tempo. <strong>2 acertos seguidos</strong> sobem um nível; <strong>2 erros seguidos</strong> descem um. Um acerto ou erro isolado mantém.</p></div>
+      <div class="card"><span class="tag">Régua da velocidade</span><p>Olha o tempo em relação à média pessoal da criança. Acerto rápido sobe; acerto devagar mantém; erro desce. Um erro <em>muito</em> rápido (provável chute) desce só meio degrau.</p></div>
+    </div>
+    <h3 style="font-size:1.7rem;margin-bottom:.5em">Experimente!</h3>
+    <div class="demo" id="demo">
+      <div class="stage" id="stage" aria-hidden="true"></div>
+      <p style="margin-bottom:.2em">Faça de conta que você está jogando. Toque nas respostas e veja as letras caírem mais rápido ou mais devagar.</p>
+      <div class="meters">
+        <div class="meter"><strong>Nível do conteúdo</strong> <span id="lvlTxt"></span><div class="bar" id="lvlBar" aria-hidden="true"></div><small id="streakTxt" style="color:var(--muted)"></small></div>
+        <div class="meter sp"><strong>Velocidade da queda</strong> <span id="spdTxt"></span><div class="bar" id="spdBar" aria-hidden="true"></div></div>
+      </div>
+      <div class="btns">
+        <button data-a="fast-hit">Acertei rápido</button><button data-a="slow-hit">Acertei devagar</button><button data-a="err">Errei</button><button data-a="err-fast">Errei muito rápido</button><button data-a="reset">Recomeçar</button>
+      </div>
+      <ul class="log" id="log" aria-live="polite"></ul>
+      <p style="margin:12px 0 0;font-size:.9rem;color:var(--muted)">Exemplo didático do mecanismo atual, com a escala de 0 a 4 do conteúdo. Os valores são provisórios.</p>
+    </div>
+    <h3 style="font-size:1.7rem;margin:1.6em 0 .4em">Por que medir no começo</h3>
+    <p>Crianças mais velhas têm dificuldades diferentes das mais novas, e a série não diz quais. Uma criança de 4º ano pode já distinguir bem as letras e ainda errar ao ligar o som à imagem. Por isso o jogo mede cada habilidade na Sala de Entrada e usa o resultado para dar mais prática onde a criança precisa, em vez de seguir uma ordem fixa para todos.</p>
+    <h3 style="font-size:1.7rem;margin:1.2em 0 .4em">O que ainda está em decisão</h3>
+    <p>A regra de 2 acertos e 2 erros deixa a criança errando metade das vezes no nível de fronteira, o que é pouco acolhedor. Simulações mostram que "3 acertos sobem, 1 erro desce" mira cerca de 79% de acerto. A Sala de Entrada já usa essa regra. A decisão para os jogos e o critério de "dominou" (por exemplo, 8 de 10 com 3 alternativas) dependem de profissionais e do piloto.</p>
+  </div>
